@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+ <style type="text/css">
+   
+  .el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+  
+  .el-main {
+    background-color: #E9EEF3;
+    color: #333;
+    text-align: center;
+    line-height: 160px;
+  }
+     
+  body > .el-container {
+    margin-bottom: 40px;
+  }
+  
+  .el-container:nth-child(5) .el-aside,
+  .el-container:nth-child(6) .el-aside {
+    line-height: 260px;
+  }   
+  
+  .el-container:nth-child(7) .el-aside {
+    line-height: 320px;
+  }
+
+</style>
+</head>
+
+<body>
+  <div id="app">
+<el-container>
+  <el-header>须知：目前仅支持学号密码登录，不支持手机验证码，不记得密码可登录APP找回密码再填写
+
+
+  </el-header>
+  <el-main>
+  <el-form  ref="form" :model="form" :rules="rules" label-width="80px">
+  <el-form-item label="学号">
+    <el-input v-model="form.name"></el-input>
+  </el-form-item>
+  <el-form-item label="密码"  prop="password">
+    <el-input v-model="form.password"></el-input>
+  </el-form-item>
+  <el-form-item label="确认密码"  prop="comfirmPassword">
+    <el-input v-model="form.comfirmPassword" autocomplete="off"></el-input>
+  </el-form-item>
+  <el-form-item label="QQ号" prop="Qnumber">
+    <el-input v-model="form.Qnumber"></el-input>
+  </el-form-item>
+  <el-form-item label="宿舍区">
+    <el-select v-model="form.region" placeholder="请选择宿舍区"style="float: left;">
+      <el-option label="东区" value="east"></el-option>
+      <el-option label="西区" value="west"></el-option>
+      <el-option label="北区" value="north"></el-option>
+    </el-select>
+  </el-form-item>
+  <el-form-item label="起始时间">
+    <el-col :span="11">
+      <el-date-picker type="date" placeholder="选择日期" v-model="form.date1" style="width: 100%;" ></el-date-picker>
+    </el-col>
+  </el-form-item>
+  <el-form-item label="截止时间" prop="date2">
+    <el-col :span="11">
+      <el-date-picker type="date" placeholder="选择日期" v-model="form.date2" style="width: 100%;" ></el-date-picker>
+    </el-col>
+    <el-col class="line" :span="0.1">——</el-col>
+    <el-col :span="12.8">
+      <el-time-picker placeholder="选择时间" v-model="form.date3" style="width: 100%;"></el-time-picker>
+    </el-col>
+  
+      <label style="float: left;">选择任务的最晚时间</label>
+ 
+  </el-form-item>
+ 
+  <el-form-item label="需要服务">
+    <template>
+     <el-radio-group v-model="form.radio">
+    <el-radio :label="1">签到（3元）</el-radio>
+    <el-radio :label="2">查寝（5元）</el-radio>
+    <el-radio :label="3">签到+查寝（8元）</el-radio>
+    </el-radio-group>
+    </template>
+    <!-- <el-checkbox-group v-model="form.type">
+      <el-checkbox label="签到+查寝" name="type"></el-checkbox>
+      <el-checkbox label="签到" name="type"></el-checkbox>
+      <el-checkbox label="查寝" name="type"></el-checkbox>
+    </el-checkbox-group> -->
+  </el-form-item>
+ <!--  <el-form-item label="特殊资源">
+    <el-radio-group v-model="form.resource">
+      <el-radio label="线上品牌商赞助"></el-radio>
+      <el-radio label="线下场地免费"></el-radio>
+    </el-radio-group>
+  </el-form-item>
+  <el-form-item label="活动形式">
+    <el-input type="textarea" v-model="form.desc"></el-input>
+  </el-form-item> -->
+  <el-form-item>
+    <el-button type="primary" @click="submitForm('form')">确认提交</el-button>
+    <el-button>取消</el-button>
+  </el-form-item>
+  </el-form>
+  </el-main>
+</el-container>
+
+
+</div>
+
+</body>
+
+
+ <!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+ <!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://cdn.bootcss.com/qs/6.5.2/qs.min.js"></script>
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript">
+    var date = Date()
+   var Main = {
+    data() {
+          
+       var validatePass = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入密码'));
+        }else {
+          if (this.form.comfirmPassword !== '') {
+            this.$refs.form.validateField('comfirmPassword');
+          }
+          callback();
+        }
+      };
+      var validatePass2 = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请再次输入密码'));
+        } else if (value !== this.form.password) {
+          callback(new Error('两次输入密码不一致!'));
+        } else {
+          callback();
+        }
+      };
+      
+      return {
+        form: {
+          name: '',
+          region: 'east',
+          date1: new Date(),
+          date2: '',
+          date3: '',
+          radio: 1,
+          password: '',
+          comfirmPassword: ''
+          
+
+        },
+        rules: {
+          password: [
+            { validator: validatePass, trigger: 'blur' }
+          ],
+          comfirmPassword: [
+            { validator: validatePass2, trigger: 'blur' }
+          ],
+          Qnumber: [
+             { required: true, message: '请输入QQ号', trigger: 'blur' },
+          ],
+          date2: [
+            { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
+          ],
+          
+        }
+      }
+    },
+    methods: {
+      submitForm(formName) {
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            alert('请确认填写信息正确无误!');
+            // this.$message('请确认填写信息正确无误');
+          } else {
+            console.log('请重新填写');
+            return false;
+          }
+        });
+      
+            let formData = new FormData();
+           
+            for(let key in this.form){
+                formData.append(key,this.form[key]);
+                console.log("GetKey"+formData.get(key));
+            }
+             console.log("表单信息"+ formData);
+            var slefurl="http://192.168.1.109:8802/nowadaysCompus/get_user";
+            // Vue.prototype.$axios = axios
+            // this.$axios({
+            //     method:"post",
+            //     url:"http://192.168.1.109:8802/nowadaysCompus/get_user",
+            //     headers: {
+            //         "Content-Type": false,
+            //         "Process-Data": false,
+            //         "Access-Control-Allow-Origin": "*",
+            //         "Access-Control-Allow-Credentials": "true"
+            //     },
+            //     withCredentials:true,
+            //     data:formData
+            // }).then((response)=>{
+            //     console.log(response);
+            // });
+            $.ajax({
+              type: "POST",
+              dataType: "json",
+              contentType:false,
+              processData:false,
+              url: slefurl,
+              data:formData,
+              success: function(result){
+                console.log(result);
+              }
+            })
+
+      }
+    }
+  }
+var Ctor = Vue.extend(Main)
+// new Ctor().$mount('#app')
+const app = new Ctor({
+   el:'#app'
+})
+</script>
+
+  </html>
